@@ -130,84 +130,7 @@ const createbooks = async function (req, res) {
 module.exports.createbooks = createbooks;
 
 
-//GET /books by query -------------->
-// const getbooks = async function (req, res) {
-//     try {
-// let filterDel = { isDeleted: false, deletedAt: null };
-// let queryPara = req.query;
-
-// if (!validator.validator.isValidrequestBody(queryPara)) {
-//     const { userId, category, subcategory } = queryPara
-
-//     if(validator.validator.isValid(queryPara)){
-//         if (!validator.validator.isValid(userId)) {
-//         res.status(404).send({status: false, message: "not valid user ID"})
-//         return
-//     } 
-//     if(!validator.validator.isValidObjectId(userId)){
-//         res.status(404).send({status: false, message: "not valid user ID"})
-//         return
-//     }
-// }
-// if (validator.validator.isValid(userId) && validator.validator.isValidObjectId(userId)){
-//     filterDel.userId = userId
-// }
-
-//     if (validator.validator.isValid(category)) {
-//         filterDel.category = category.trim();
-//     }
-
-//     if (validator.validator.isValid(subcategory)) {
-//         filterDel.subcategory = subcategory.trim();
-//     }
-
-//     let findBooks = await BookModel.find(filterDel).select({
-//         _id: 1,
-//         title: 1,
-//         excerpt: 1,
-//         userId: 1,
-//         category: 1,
-//         releasedAt: 1,
-//         reviews: 1,
-//     });
-
-
-//     if (Array.isArray(findBooks) && findBooks.length === 0) {
-//         res.status(404).send({ status: false, message: "No Books Found" });
-//         return;
-//     }
-
-//     let sortedByBookName = findBooks.sort(
-//         (a, b) => (a.title > b.title && 1) || -1
-//     );
-
-//     console.log(sortedByBookName)
-//     res
-//         .status(200)
-//         .send({
-//             status: true,
-//             message: "is this the book your looking for?",
-//             data: sortedByBookName,
-//         });
-//     return;
-// }
-
-// let findNotDel = await BookModel.find({
-//     isDeleted: false,
-//     deletedAt: null,
-// });
-
-// let sortedByBookTitle = findNotDel.sort(
-//     (a, b) => (a.title > b.title && 1) || -1
-// );
-// if (sortedByBookTitle) {
-//     res.status(200).send({ status: true, data: sortedByBookTitle });
-//     return;
-// }
-//     } catch (err) {
-//         return res.status(500).send({ msg: err.message });
-//     }
-// };
+// get books by query-------->
 const getbooks = async function(req, res) {
     try {
 
@@ -270,8 +193,6 @@ const getbooks = async function(req, res) {
         return res.status(500).send({ msg: err.message })
     }
 }
-
-
 
 module.exports.getbooks = getbooks;
 
