@@ -1,22 +1,7 @@
 const BookModel = require("../models/BookModel.js")
 const ReviewModel = require("../models/ReviewModel.js")
 const mongoose = require('mongoose')
-
-const isValid = function (value) {
-
-    if (typeof value === 'undefined' || value === null) return false
-    if (typeof value === 'string' && value.trim().length === 0) return false
-    return true;
-}
-
-const isValidrequestBody = function (requestBody) {
-    return Object.keys(requestBody).length > 0
-}
-
-const isValidObjectId = function (ObjectId) {
-    return mongoose.Types.ObjectId.isValid(ObjectId)
-}
-
+let validator = require('../controllers/validateController')
 
 //POST review /books/:bookId/review---------------->
 const bookreview = async function (req, res) {
@@ -25,26 +10,32 @@ const bookreview = async function (req, res) {
         const requestBody = req.body
         const bookId = req.params.bookId
 
-        const book = await BookModel.findById({ _id: bookId, isDeleted: false })
+        if(!validator.isValidObjectId(bookId)){
+            res.status(400).send({status: false, message: `${bookId} this is not valid book id please! check`})
+            return
+        }
+
+        const book = await BookModel.findOne({ _id: bookId, isDeleted: false })
 
         if (!book) {
             res.status(404).send({ status: false, message: `book not found` })
             return
         }
 
-        if (!isValidrequestBody(requestBody)) {
+        if (!validator.isValidrequestBody(requestBody)) {
             res.status(400).send({ status: false, message: 'request body is not found' })
         }
 
         //extract params
         const { reviewedBy, reviews, rating, isDeleted } = requestBody
 
-        if (!isValid(reviews)) {
+
+        if (!validator.isValid(reviews)) {
             res.status(400).send({ status: false, message: 'reviews required' })
             return
         }
 
-        if (!isValid(rating)) {
+        if (!validator.isValid(rating)) {
             res.status(400).send({ status: false, message: 'rating required' })
             return
         }
@@ -79,17 +70,17 @@ const updateReviews = async function (req, res) {
         let reviewId = reqParam.reviewId;
         let bookId = reqParam.bookId;
 
-        if (!isValidrequestBody(reqBody)) {
+        if (!validator.isValidrequestBody(reqBody)) {
             res.status(400).send({ status: false, message: "No paramateres passed. Review unmodified" });
             return;
         }
 
-        if (!isValidObjectId(bookId)) {
+        if (!validator.isValidObjectId(bookId)) {
             res.status(400).send({ status: false, message: `${bookId} is not a valid book id` });
             return;
         }
 
-        if (!isValidObjectId(reviewId)) {
+        if (!validator.isValidObjectId(reviewId)) {
             res.status(400).send({ status: false, message: `${reviewId} is not a valid review id` });
             return;
         }
@@ -110,7 +101,7 @@ const updateReviews = async function (req, res) {
 
         const { reviews, rating, reviewedBy } = reqBody;
 
-        if (!isValid(rating)) {
+        if (!validator.isValid(rating)) {
 
             res.status(400).send({ status: false, message: "please! enter valid rating" });
             return;
@@ -140,11 +131,11 @@ const deleteReviewOfBook = async function (req, res) {
     try {
         let bookId = req.params.bookId
         let reviewId = req.params.reviewId
-        if (!isValidObjectId(bookId)) {
+        if (!validator.isValidObjectId(bookId)) {
             res.status(400).send({ status: false, message: "please! enter valid book Id" })
             return
         }
-        if (!isValidObjectId(reviewId)) {
+        if (!validator.isValidObjectId(reviewId)) {
             res.status(400).send({ status: false, message: "please! enter valid review Id" })
             return
         }

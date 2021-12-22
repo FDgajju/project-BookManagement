@@ -1,30 +1,6 @@
 const UserModel = require("../models/UserModel.js")
 const jwt = require("jsonwebtoken")
-
-
-const isValid = function (value) {
-
-    if (typeof value === 'undefined' || value === null) return false
-    if (typeof value === 'string' && value.trim().length === 0) return false
-    return true;
-}
-
-const isValidTitle = function (title) {
-    return ['Mr', 'Mrs', 'Miss'].indexOf(title) !== -1
-}
-
-const isValidrequestBody = function (requestBody) {
-    return Object.keys(requestBody).length !== 0
-
-}
-function telephoneCheck(str) {
-
-    if (/^(1\s|1|)?((\(\d{3}\))|\d{3})(\-|\s)?(\d{3})(\-|\s)?(\d{4})$/.test(str)) {
-        return true
-    }
-    return false
-
-}
+let validator = require('../controllers/validateController')
 
 //POST /register
 const registerUser = async function (req, res) {
@@ -32,7 +8,7 @@ const registerUser = async function (req, res) {
 
         const requestBody = req.body
 
-        if (!isValidrequestBody(requestBody)) {
+        if (!validator.isValidrequestBody(requestBody)) {
             res.status(400).send({ status: false, message: 'value in request body is required' })
             return
         }
@@ -40,27 +16,27 @@ const registerUser = async function (req, res) {
         //extract param
         const { title, name, phone, email, password, address } = requestBody
 
-        if (!isValid(name)) {
+        if (!validator.isValid(name)) {
             res.status(400).send({ status: false, message: 'name is not valid' })
             return
         }
 
-        if (!isValid(phone)) {
+        if (!validator.isValid(phone)) {
             res.status(400).send({ status: false, message: 'phone is not valid' })
             return
         }
 
-        if (!isValid(title)) {
+        if (!validator.isValid(title)) {
             res.status(400).send({ status: false, message: 'title is required' })
             return
         }
 
-        if (!isValidTitle(title.trim())) {
+        if (!validator.isValidTitle(title.trim())) {
             res.status(400).send({ status: false, message: 'title is not valid provid among mr,miss,mrs' })
             return
 
         }
-        if (!isValid(password)) {
+        if (!validator.isValid(password)) {
             res.status(400).send({ status: false, message: 'password is required' })
             return
         }
@@ -69,28 +45,25 @@ const registerUser = async function (req, res) {
         if (!((password.length > 7) && (password.length < 16))) {
 
             return res.status(400).send({ status: false, message: `Password length should be between 8 and 15.` })
-
-        }
-        if (!telephoneCheck(phone.trim())) {
+        }//trim
+        if (!validator.isValidPhone(phone)) {
             return res.status(400).send({ status: false, msg: "The phone no. is not valid" })
         }
 
-        const isNumberAlreadyUsed = await UserModel.findOne({ phone });
-        if (isNumberAlreadyUsed) {
-            res.status(400).send({ status: false, message: `${phone} phone is already registered` })
+        const isNumberAndEmailAlreadyUsed = await UserModel.find({$or:[ { phone: phone}, {email: email}] });
+        if (isNumberAndEmailAlreadyUsed) {
+            res.status(400).send({ status: false, message: `check your ${phone} number or email ${email.trim()}` })
             return
         }
 
-        const isEmailAlreadyUsed = await UserModel.findOne({ email });
+        // const isEmailAlreadyUsed = await UserModel.findOne({ email });
 
-        if (isEmailAlreadyUsed) {
-            res.status(400).send({ status: false, message: `${email.trim()} email is already registered` })
-            return
-        }
+        // if (isEmailAlreadyUsed) {
+        //     res.status(400).send({ status: false, message: `${email.trim()} email is already registered` })
+        //     return
+        // }
 
-
-
-        if (!isValid(email)) {
+        if (!validator.isValid(email)) {
             res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide valid email' })
             return
         }
@@ -116,7 +89,7 @@ const login = async function (req, res) {
     try {
 
         const requestBody = req.body
-        if (!isValidrequestBody(requestBody)) {
+        if (!validator.isValidrequestBody(requestBody)) {
             res.status(400).send({ status: false, message: 'value in request body is required' })
             return
         }
@@ -124,7 +97,7 @@ const login = async function (req, res) {
         let email = req.body.email
         let password = req.body.password
 
-        if (!isValid(email)) {
+        if (!validator.isValid(email)) {
             res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide valid email' })
             return
         }
@@ -135,7 +108,7 @@ const login = async function (req, res) {
             return
         }
 
-        if (!isValid(password)) {
+        if (!validator.isValid(password)) {
             res.status(400).send({ status: false, message: 'password must be present' })
             return
         }

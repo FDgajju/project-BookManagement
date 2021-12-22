@@ -80,10 +80,3 @@ const BooksSchema = new mongoose.Schema({
 
 module.exports = mongoose.model('Books', BooksSchema )
 
-    
-
-
-    
-
-   
-
