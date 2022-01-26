@@ -14,16 +14,16 @@ let isValidObjectId = function(ObjectId){
     return mongoose.Types.ObjectId.isValid(ObjectId)
 }
 
-const isValidrequestBody = function (requestBody) {
+const isValidRequestBody = function (requestBody) {
     return Object.keys(requestBody).length !== 0
 }
 
 let isValidPhone = function(str) {
 
-    if (/^(1\s|1|)?((\(\d{3}\))|\d{3})(\-|\s)?(\d{3})(\-|\s)?(\d{4})$/.test(str)) {
+    if (/^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/.test(str)) {
         return true
     }
     return false
 }
 
-module.exports = {isValidTitle, isValidrequestBody, isValid, isValidPhone, isValidObjectId}
+module.exports = {isValidTitle, isValidRequestBody, isValid, isValidPhone, isValidObjectId}

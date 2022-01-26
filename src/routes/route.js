@@ -2,9 +2,9 @@ const express = require('express');
 
 const router = express.Router();
 
-const usercontroller = require("../controllers/usercontroller")
-const bookcontroller = require("../controllers/bookcontroller")
-const Reviewcontroller = require("../controllers/Reviewcontroller")
+const userController = require("../controllers/userController")
+const bookController = require("../controllers/bookController")
+const ReviewController = require("../controllers/ReviewController")
 const Middleware = require("../middleware/Authentication")
 
 router.get('/test-me', function (req, res) {
@@ -12,31 +12,24 @@ router.get('/test-me', function (req, res) {
 });
 
 //USER API
-router.post('/User', usercontroller.registerUser)
-router.post('/login', usercontroller.login)
+router.post('/User', userController.registerUser)
+router.post('/login', userController.login)
 
 
-//BOOK API
+//BOOK API  
+router.post('/books', Middleware.Auth, bookController.createBooks) //authorization
 
-router.post('/books', Middleware.Auth, bookcontroller.createbooks) //authorisation
+router.get('/books', Middleware.Auth, bookController.getBooks)//
+router.put('/books/:bookId', Middleware.Auth, bookController.update) //authorization
+router.get('/books/:bookId', Middleware.Auth, bookController.getBookWithReview)
 
-router.get('/books', Middleware.Auth, bookcontroller.getbooks)//
-router.put('/books/:bookId', Middleware.Auth, bookcontroller.update) //authorisation
-router.get('/books/:bookId', Middleware.Auth, bookcontroller.getBookWithReview)
+router.delete('/books/:bookId', Middleware.Auth, bookController.deleteBookByID) //authorization
+//router.delete('/books/:bookId',bookController.deleteBookByID) 
 
-router.delete('/books/:bookId', Middleware.Auth, bookcontroller.deletebookbyID) //authorisation
-//router.delete('/books/:bookId',bookcontroller.deletebookbyID) 
-
-//Reiew API 
-router.post('/books/:bookId/review', Reviewcontroller.bookreview)
-router.put('/books/:bookId/review/:reviewId', Reviewcontroller.updateReviews)
-router.delete('/books/:bookId/review/:reviewId', Reviewcontroller.deleteReviewOfBook)
-
-
-
-
-
-
+//Review API 
+router.post('/books/:bookId/review', ReviewController.bookReview)
+router.put('/books/:bookId/review/:reviewId', ReviewController.updateReviews)
+router.delete('/books/:bookId/review/:reviewId', ReviewController.deleteReviewOfBook)
 
 
 module.exports = router;

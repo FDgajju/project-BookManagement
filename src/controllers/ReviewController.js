@@ -1,10 +1,10 @@
 const BookModel = require("../models/BookModel.js")
 const ReviewModel = require("../models/ReviewModel.js")
 const mongoose = require('mongoose')
-let validator = require('../controllers/validateController')
+let validator = require('./validateController')
 
 //POST review /books/:bookId/review---------------->
-const bookreview = async function (req, res) {
+const bookReview = async function (req, res) {
     try {
 
         const requestBody = req.body
@@ -22,7 +22,7 @@ const bookreview = async function (req, res) {
             return
         }
 
-        if (!validator.isValidrequestBody(requestBody)) {
+        if (!validator.isValidRequestBody(requestBody)) {
             res.status(400).send({ status: false, message: 'request body is not found' })
         }
 
@@ -50,16 +50,13 @@ const bookreview = async function (req, res) {
 
         let savedReview = await ReviewModel.create(ReviewData)
         await BookModel.findOneAndUpdate({ _id: bookId }, { $inc: { "reviews": 1 } }, { new: true })
-        res.status(200).send({ status: true, message: 'Review created succesfully', data: savedReview })
+        res.status(200).send({ status: true, message: 'Review created successfully', data: savedReview })
     }
     catch (err) {
         res.status(500).send({ status: false, message: err.message })
 
     }
 }
-
-module.exports.bookreview = bookreview
-
 
 
 //PUT update books by ID /books/:bookId/review/:reviewId
@@ -70,8 +67,8 @@ const updateReviews = async function (req, res) {
         let reviewId = reqParam.reviewId;
         let bookId = reqParam.bookId;
 
-        if (!validator.isValidrequestBody(reqBody)) {
-            res.status(400).send({ status: false, message: "No paramateres passed. Review unmodified" });
+        if (!validator.isValidRequestBody(reqBody)) {
+            res.status(400).send({ status: false, message: "No parameters passed. Review unmodified" });
             return;
         }
 
@@ -123,9 +120,6 @@ const updateReviews = async function (req, res) {
     }
 };
 
-module.exports.updateReviews = updateReviews;
-
-
 //DELETE book by Id /books/:bookId/review/:reviewId ------------------------->
 const deleteReviewOfBook = async function (req, res) {
     try {
@@ -143,7 +137,7 @@ const deleteReviewOfBook = async function (req, res) {
         let findBook = await BookModel.findOne({ _id: bookId, isDeleted: false })
 
         if (!findReview) {
-            return res.status(404).send({ status: false, msg: `no reviews found whith this ${reviewId} id` })
+            return res.status(404).send({ status: false, msg: `no reviews found with this ${reviewId} id` })
         }
         if (!findBook) {
             return res.status(404).send({ status: false, msg: `no book found with this ${bookId} id` })
@@ -163,7 +157,7 @@ const deleteReviewOfBook = async function (req, res) {
     }
 }
 
-module.exports.deleteReviewOfBook = deleteReviewOfBook
+module.exports = {bookReview, updateReviews, deleteReviewOfBook}
 
 
 

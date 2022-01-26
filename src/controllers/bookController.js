@@ -2,9 +2,9 @@ const BookModel = require("../models/BookModel.js");
 const UserModel = require("../models/UserModel.js");
 const ReviewModel = require("../models/ReviewModel.js");
 const mongoose = require("mongoose");
-let validator = require('../controllers/validateController')
+let validator = require('./validateController')
 
-const createbooks = async function (req, res) {
+const createBooks = async function (req, res) {
     try {
         let decodedUserToken = req.user;
         const requestBody = req.body;
@@ -14,7 +14,7 @@ const createbooks = async function (req, res) {
                 .status(400)
                 .send({ status: false, message: "token id or user id not matched" });
         }
-        if (!validator.validator.isValidrequestBody(requestBody)) {
+        if (!validator.isValidRequestBody(requestBody)) {
             res
                 .status(400)
                 .send({ status: false, message: "request body is not found" });
@@ -32,47 +32,47 @@ const createbooks = async function (req, res) {
             releasedAt,
         } = requestBody;
 
-        if (!validator.validator.isValid(title)) {
-            res.status(400).send({ status: false, message: "title is required" });
+        if (!validator.isValid(title)) {
+            res.status(400).send({ status: false, message: "book title is required" });
             return;
         }
 
-        if (!validator.validator.isValid(excerpt)) {
+        if (!validator.isValid(excerpt)) {
             res.status(400).send({ status: false, message: "excerpt required" });
             return;
         }
 
-        if (!validator.validator.isValid(userId)) {
-            res.status(400).send({ status: false, message: "userId requred" });
+        if (!validator.isValid(userId)) {
+            res.status(400).send({ status: false, message: "userId required" });
             return;
         }
 
-        if (!validator.validator.isValidObjectId(userId)) {
+        if (!validator.isValidObjectId(userId)) {
             res.status(400).send({ status: false, message: "object id is required" });
             return;
         }
 
-        if (!validator.validator.isValid(category)) {
+        if (!validator.isValid(category)) {
             res.status(400).send({ status: false, message: "category required" });
             return;
         }
 
-        if (!validator.validator.isValid(subcategory)) {
+        if (!validator.isValid(subcategory)) {
             res.status(400).send({ status: false, message: "subcategory required" });
             return;
         }
 
-        if (!validator.validator.isValid(releasedAt)) {
+        if (!validator.isValid(releasedAt)) {
             res.status(400).send({ status: false, message: "releasedAt required" });
             return;
         }
 
-        const istitleAlreadyUsed = await BookModel.findOne({ title });
+        const isTitleAlreadyUsed = await BookModel.findOne({ title });
 
-        if (istitleAlreadyUsed) {
+        if (isTitleAlreadyUsed) {
             res
                 .status(400)
-                .send({ status: false, message: `${title} title is already exist` });
+                .send({ status: false, message: `${title} book is already exist` });
             return;
         }
 
@@ -85,12 +85,12 @@ const createbooks = async function (req, res) {
             return;
         }
 
-        if (!validator.validator.isValid(userId)) {
+        if (!validator.isValid(userId)) {
             res.status(400).send({ status: false, message: "userId 1 is required" });
             return;
         }
 
-        if (!validator.validator.isValidObjectId(userId)) {
+        if (!validator.isValidObjectId(userId)) {
             res
                 .status(400)
                 .send({ status: false, message: `${userId} 1 is not a valid userId` });
@@ -114,44 +114,44 @@ const createbooks = async function (req, res) {
             subcategory,
             releasedAt: releasedAt ? releasedAt : "releasedAt field is mandatory",
         };
-        let savedbook = await BookModel.create(bookData);
+        let savedBook = await BookModel.create(bookData);
         res
             .status(201)
             .send({
                 status: true,
-                message: "book created succesfully",
-                data: savedbook,
+                message: "book created successfully",
+                data: savedBook,
             });
     } catch (err) {
         res.status(500).send({ status: false, message: err.message });
     }
 };
 
-module.exports.createbooks = createbooks;
-
-
 // get books by query-------->
-const getbooks = async function(req, res) {
+const getBooks = async function (req, res) {
     try {
 
         //const params = req.params
 
         let filterDel = { isDeleted: false, deletedAt: null };
         let queryPara = req.query;
+        // console.log(queryPara.subcategory)
 
-        if (queryPara.userId) {
-            if (!(validator.isValid(queryPara.userId) && validator.isValidObjectId(queryPara.userId))) {
-                return res.status(400).send({ status: false, message: `${queryPara.userId}​​​​​​​​​ is not a valid userId` })
+        if (queryPara) {
+            if (queryPara.hasOwnProperty("userId")) {
+                if (!(validator.isValid(queryPara.userId) && validator.isValidObjectId(queryPara.userId))) {
+                    return res.status(400).send({ status: false, message: `${queryPara.userId}​​​​​​​​​ is not a valid userId` })
 
+                }
+                filterDel["userId"] = queryPara.userId.trim();
             }
-            filterDel["userId"] = queryPara.userId.trim();
 
             if (queryPara.category) {
                 if (!(validator.isValid(queryPara.category))) {
                     return res.status(400).send({ status: false, message: `${queryPara.category}​​​​​​​​​ is not a valid userId` })
 
                 }
-                filterDel["category"] = queryPara.category.trim();
+                filterDel.category = queryPara.category.trim();
             }
 
             if (queryPara.subcategory) {
@@ -163,7 +163,7 @@ const getbooks = async function(req, res) {
                 filterDel["subcategory"] = queryPara.subcategory.trim();
             }
 
-
+            console.log(filterDel)
             let findBooks = await BookModel.find(filterDel).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, subcategory: 1, releasedAt: 1, reviews: 1 });
 
 
@@ -194,19 +194,17 @@ const getbooks = async function(req, res) {
     }
 }
 
-module.exports.getbooks = getbooks;
-
 //GET books by Id /books/:bookId ------------------------>
 const getBookWithReview = async function (req, res) {
     try {
         const bookId = req.params.bookId;
 
-        if (!validator.validator.isValidObjectId(bookId)) {
+        if (!validator.isValidObjectId(bookId)) {
             res.status(400).send({ status: false, message: "invalid book ID" })
             return;
         }
 
-        if (!validator.validator.isValid(bookId)) {
+        if (!validator.isValid(bookId)) {
             res
                 .status(400)
                 .send({
@@ -220,7 +218,7 @@ const getBookWithReview = async function (req, res) {
             ISBN: 0,
         });
         //console.log( bookDetail )
-        if (!validator.validator.isValid(bookDetail)) {
+        if (!validator.isValid(bookDetail)) {
             res.status(404).send({ status: false, msg: `invalid book ID` });
             return;
         }
@@ -259,12 +257,10 @@ const getBookWithReview = async function (req, res) {
     }
 };
 
-module.exports.getBookWithReview = getBookWithReview;
-
 //Put update books by Id /books/:bookId---------------->
 const update = async function (req, res) {
     try {
-        //const requestbody= req.body
+        //const requestBody= req.body
         let decodedUserToken = req.user;
         console.log(req.params);
         let bookUser = await BookModel.findOne({ _id: req.params.bookId });
@@ -277,11 +273,11 @@ const update = async function (req, res) {
             }
 
             if (bookUser.isDeleted == false && bookUser.deletedAt == null) {
-                const istitleAlreadyUsed = await BookModel.findOne({
+                const isTitleAlreadyUsed = await BookModel.findOne({
                     title: req.body.title,
                 });
 
-                if (istitleAlreadyUsed) {
+                if (isTitleAlreadyUsed) {
                     res
                         .status(400)
                         .send({
@@ -305,7 +301,7 @@ const update = async function (req, res) {
                     return;
                 }
 
-                let newdata = await BookModel.findOneAndUpdate(
+                let newData = await BookModel.findOneAndUpdate(
                     { _id: bookUser },
                     {
                         title: req.body.title,
@@ -325,22 +321,20 @@ const update = async function (req, res) {
                         });
                 }
 
-                console.log(newdata);
+                console.log(newData);
 
-                res.status(200).send({ status: true, data: newdata });
+                res.status(200).send({ status: true, data: newData });
             }
         } else {
-            res.status(404).send({ err: "The User is Not Authorised" });
+            res.status(404).send({ err: "The User is Not Authorized" });
         }
     } catch (err) {
         res.status(500).send({ status: false, message: err.message });
     }
 };
 
-module.exports.update = update;
-
 //DELETE book by ID /books/:bookId
-const deletebookbyID = async function (req, res) {
+const deleteBookByID = async function (req, res) {
     try {
         let decodedUserToken = req.user;
         // console.log(decodedUserToken)
@@ -348,13 +342,13 @@ const deletebookbyID = async function (req, res) {
         const bookId = req.params.bookId;
         // console.log(bookId)
 
-        if (!validator.validator.isValidObjectId(bookId)) {
+        if (!validator.isValidObjectId(bookId)) {
             res
                 .status(400)
                 .send({ status: false, message: `${bookId} is not a valid bookId` });
             return;
         }
-        // if(!validator.validator.isValidObjectId(decodedUserToken)) {
+        // if(!validator.isValidObjectId(decodedUserToken)) {
         //     res.status(400).send({status: false, message: `${decodedUserToken} is not a valid token id`})
         //     return
         // }
@@ -391,4 +385,4 @@ const deletebookbyID = async function (req, res) {
     }
 };
 
-module.exports.deletebookbyID = deletebookbyID;
+module.exports = {createBooks, getBooks, getBookWithReview, update, deleteBookByID};

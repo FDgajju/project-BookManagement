@@ -1,6 +1,6 @@
 const UserModel = require("../models/UserModel.js")
 const jwt = require("jsonwebtoken")
-let validator = require('../controllers/validateController')
+let validator = require('./validateController')
 
 //POST /register
 const registerUser = async function (req, res) {
@@ -8,7 +8,7 @@ const registerUser = async function (req, res) {
 
         const requestBody = req.body
 
-        if (!validator.isValidrequestBody(requestBody)) {
+        if (!validator.isValidRequestBody(requestBody)) {
             res.status(400).send({ status: false, message: 'value in request body is required' })
             return
         }
@@ -32,7 +32,7 @@ const registerUser = async function (req, res) {
         }
 
         if (!validator.isValidTitle(title.trim())) {
-            res.status(400).send({ status: false, message: 'title is not valid provid among mr,miss,mrs' })
+            res.status(400).send({ status: false, message: 'title is not valid provide among mr,miss,mrs' })
             return
 
         }
@@ -50,18 +50,18 @@ const registerUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "The phone no. is not valid" })
         }
 
-        const isNumberAndEmailAlreadyUsed = await UserModel.find({$or:[ { phone: phone}, {email: email}] });
-        if (isNumberAndEmailAlreadyUsed) {
-            res.status(400).send({ status: false, message: `check your ${phone} number or email ${email.trim()}` })
+        const isNumberAlreadyUsed = await UserModel.findOne({ phone });
+        if (isNumberAlreadyUsed) {
+            res.status(400).send({ status: false, message: `your ${phone} number is already used` })
             return
         }
 
-        // const isEmailAlreadyUsed = await UserModel.findOne({ email });
+        const isEmailAlreadyUsed = await UserModel.findOne({ email });
 
-        // if (isEmailAlreadyUsed) {
-        //     res.status(400).send({ status: false, message: `${email.trim()} email is already registered` })
-        //     return
-        // }
+        if (isEmailAlreadyUsed) {
+            res.status(400).send({ status: false, message: `${email.trim()} email is already registered` })
+            return
+        }
 
         if (!validator.isValid(email)) {
             res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide valid email' })
@@ -75,8 +75,8 @@ const registerUser = async function (req, res) {
         }
 
         const userData = { title: title, name, phone, email, password, address }
-        let saveduser = await UserModel.create(userData)
-        res.status(201).send({ status: true, message: 'user created succesfully', data: saveduser })
+        let savedUser = await UserModel.create(userData)
+        res.status(201).send({ status: true, message: 'user created successfully', data: savedUser })
     }
     catch (err) {
         res.status(500).send({ status: false, message: err.message })
@@ -89,7 +89,7 @@ const login = async function (req, res) {
     try {
 
         const requestBody = req.body
-        if (!validator.isValidrequestBody(requestBody)) {
+        if (!validator.isValidRequestBody(requestBody)) {
             res.status(400).send({ status: false, message: 'value in request body is required' })
             return
         }
@@ -124,7 +124,7 @@ const login = async function (req, res) {
                 }, "Group8") //exp date 30*60=30min
                 res.header('x-api-key', Token)
 
-                res.status(200).send({ status: true, msg: "success", data: Token })
+                res.status(200).send({ status: true, msg: "success", data: User, Token: Token })
             } else {
                 res.status(400).send({ status: false, Msg: "Invalid Credentials" })
             }
@@ -137,8 +137,4 @@ const login = async function (req, res) {
     }
 }
 
-// module.exports ={createAuthor,login}
-
-module.exports.registerUser = registerUser
-
-module.exports.login = login
+module.exports = {registerUser, login}
