@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
+// const dotenv = require("dotenv");
 const app = require("./index");
 
-dotenv.config({ path: `${__dirname}/../config.env` });
+// dotenv.config({ path: `${__dirname}/../config.env` });
 
 //mongodb connection
 const DB = process.env.DATABASE || "mongodb://localhost:27017/bookManagement";
