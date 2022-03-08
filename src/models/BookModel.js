@@ -1,6 +1,3 @@
-
-//Books Model BookModel.js
-
 const mongoose = require('mongoose')
 
 const BooksSchema = new mongoose.Schema({
